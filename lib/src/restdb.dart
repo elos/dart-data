@@ -53,7 +53,7 @@ class RestDB implements DB {
     return completer.future;
   }
 
-  Future<Record> Delete(Record r) {
+  Future<Record> Delete(Record r) async {
     var completer = new Completer<Record>();
 
     Future<HttpRequest> req = this
@@ -72,7 +72,7 @@ class RestDB implements DB {
     });
 
     return completer.future;
-  };
+  }
 
   Future<Record> Find(String kind, String id) async {
     var completer = new Completer<Record>();
