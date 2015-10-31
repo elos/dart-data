@@ -53,7 +53,26 @@ class RestDB implements DB {
     return completer.future;
   }
 
-  Future<Record> Delete(Record r);
+  Future<Record> Delete(Record r) {
+    var completer = new Completer<Record>();
+
+    Future<HttpRequest> req = this
+        .host
+        .DELETE("/${this.spaces[kind]}?${kind}_id=${id}", {'${kind}_id': id});
+
+    req.then((req) {
+      if (req.status == 200 || req.status == 201) {
+        completer.complete(r);
+      } else {
+        completer.completeError('shit');
+      }
+    }, onError: (e) {
+      print(e.target.responseText);
+      completer.completeError('NOOO');
+    });
+
+    return completer.future;
+  };
 
   Future<Record> Find(String kind, String id) async {
     var completer = new Completer<Record>();

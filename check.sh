@@ -1,3 +1,3 @@
 #!/bin/bash
 
-pub run test test/test.dart
+pub run test test/main.dart
