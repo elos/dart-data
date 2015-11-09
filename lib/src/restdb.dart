@@ -106,7 +106,9 @@ class RestQuery implements Query {
   final String kind;
   Map<String, dynamic> wheres;
 
-  RestQuery(RestDB this.db, String this.kind);
+  RestQuery(RestDB this.db, String this.kind) {
+    this.wheres = new Map<String, dynamic>();
+  }
 
   String Kind() {
     return this.kind;
