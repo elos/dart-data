@@ -1,8 +1,8 @@
 library data;
 
 import "dart:async";
-import "dart:mirrors";
 import "dart:convert" show JSON;
+import "dart:html" show HttpRequest;
 
 part 'src/interface.dart';
 part 'src/memorydb.dart';

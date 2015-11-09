@@ -58,7 +58,7 @@ class RestDB implements DB {
 
     Future<HttpRequest> req = this
         .host
-        .DELETE("/${this.spaces[kind]}?${kind}_id=${id}", {'${kind}_id': id});
+        .DELETE("/${this.spaces[r.Kind()]}?${r.Kind()}_id=${r.ID()}", {'${r.Kind()}_id': r.ID()});
 
     req.then((req) {
       if (req.status == 200 || req.status == 201) {
@@ -96,5 +96,49 @@ class RestDB implements DB {
     return completer.future;
   }
 
-  Query Query(String kind);
+  Query Query(String kind) {
+    return new RestQuery(this, kind);
+  }
+}
+
+class RestQuery implements Query {
+  final RestDB db;
+  final String kind;
+  Map<String, dynamic> wheres;
+
+  RestQuery(RestDB this.db, String this.kind);
+
+  String Kind() {
+    return this.kind;
+  }
+
+  Query Where(String property, dynamic value) {
+    this.wheres[property] = value;
+    return this;
+  }
+
+  Stream<Record> Execute() {
+    StreamController<Record> sc = new StreamController<Record>();
+
+    this.db.host.GET('/query', {
+      'kind': this.kind,
+      'space': this.db.spaces[this.kind],
+      'attrs': this.wheres
+    }).then((req) {
+      if (req.status != 200) {
+        sc.addError("shit");
+        return;
+      }
+
+      Map<String, dynamic> data = JSON.decode(req.response);
+
+      var modelsData = data["models"];
+
+      for (var m in modelsData) {
+        sc.add(this.db.constructors[this.kind](m));
+      }
+    });
+
+    return sc.stream;
+  }
 }

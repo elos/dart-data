@@ -1,5 +1,7 @@
 library data.test;
 
+@TestOn("dartium")
+
 import "dart:async";
 
 import 'package:test/test.dart';
@@ -45,7 +47,7 @@ void main() {
     expect(retrieved.id, "1");
 
     Query q = memdb.Query("test");
-    Stream<Record> records = q.Where("name", "foo").Execute();
+    Stream<Record> records = await q.Where("name", "foo").Execute();
 
     Future<List<Record>> future = records.toList();
     var foos = await future;

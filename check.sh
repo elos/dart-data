@@ -1,3 +1,3 @@
 #!/bin/bash
 
-pub run test test/main.dart
+pub run test -p content-shell test/main.dart
