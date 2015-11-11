@@ -1,5 +1,17 @@
 part of data;
 
+Map<String, dynamic> noNulls(Map<String, dynamic> m) {
+  var nm = new Map<String, dynamic>();
+
+  m.forEach((String k, dynamic v) {
+    if (v != null) {
+      nm[k] = v;
+    }
+  });
+
+  return nm;
+}
+
 abstract class Host {
   Future<HttpRequest> GET(String url, dynamic data);
   Future<HttpRequest> POST(String url, dynamic data);
@@ -32,7 +44,7 @@ class RestDB implements DB {
     var completer = new Completer<Record>();
 
     Future<HttpRequest> req =
-        this.host.POST("/${this.spaces[r.Kind()]}", r.Structure());
+        this.host.POST("/${this.spaces[r.Kind()]}", noNulls(r.Structure()));
 
     req.then((req) {
       if (req.status == 200 || req.status == 201) {
@@ -122,11 +134,12 @@ class RestQuery implements Query {
   Stream<Record> Execute() {
     StreamController<Record> sc = new StreamController<Record>();
 
-    this.db.host.GET('/query', {
+    this.db.host.POST('/query', {
       'kind': this.kind,
       'space': this.db.spaces[this.kind],
       'attrs': this.wheres
     }).then((req) {
+      print("REQUEST");
       if (req.status != 200) {
         sc.addError("shit");
         return;
@@ -134,11 +147,16 @@ class RestQuery implements Query {
 
       Map<String, dynamic> data = JSON.decode(req.response);
 
-      var modelsData = data["models"];
+      var modelsData = data["data"][this.db.spaces[this.kind]];
+      print(modelsData);
 
       for (var m in modelsData) {
         sc.add(this.db.constructors[this.kind](m));
       }
+
+      sc.close();
+    }).catchError((e) {
+      sc.addError(e);
     });
 
     return sc.stream;
